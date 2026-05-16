@@ -21,9 +21,7 @@
       --radius: 24px;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -73,6 +71,38 @@
       margin: 14px 0 0;
       color: var(--muted);
       font-size: 15px;
+    }
+
+    .top-status {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.6);
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .refresh-btn {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(91, 188, 255, 0.14);
+      color: var(--blue-dark);
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
     }
 
     .board {
@@ -139,9 +169,7 @@
       background: rgba(255, 255, 255, 0.46);
     }
 
-    tr:last-child td {
-      border-bottom: 0;
-    }
+    tr:last-child td { border-bottom: 0; }
 
     .name-link {
       color: var(--blue-dark);
@@ -150,9 +178,7 @@
       word-break: break-all;
     }
 
-    .name-link:hover {
-      text-decoration: underline;
-    }
+    .name-link:hover { text-decoration: underline; }
 
     .name-text {
       font-weight: 900;
@@ -195,7 +221,9 @@
     .sub-btn,
     .ghost-btn,
     .danger-btn,
-    .choice-btn {
+    .choice-btn,
+    .mini-btn,
+    .refresh-btn {
       cursor: pointer;
       transition: transform 0.14s ease, box-shadow 0.14s ease, opacity 0.14s ease;
     }
@@ -205,7 +233,9 @@
     .sub-btn:hover,
     .ghost-btn:hover,
     .danger-btn:hover,
-    .choice-btn:hover {
+    .choice-btn:hover,
+    .mini-btn:hover,
+    .refresh-btn:hover {
       transform: translateY(-1px);
     }
 
@@ -226,9 +256,7 @@
       z-index: 50;
     }
 
-    .modal.open {
-      display: block;
-    }
+    .modal.open { display: block; }
 
     .modal-backdrop {
       position: absolute;
@@ -241,7 +269,7 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: min(520px, calc(100% - 32px));
+      width: min(560px, calc(100% - 32px));
       max-height: calc(100vh - 40px);
       transform: translate(-50%, -50%);
       border: 1px solid rgba(255, 255, 255, 0.5);
@@ -284,13 +312,8 @@
       max-height: calc(100vh - 130px);
     }
 
-    .step {
-      display: none;
-    }
-
-    .step.active {
-      display: block;
-    }
+    .step { display: none; }
+    .step.active { display: block; }
 
     .help-text {
       margin: 0 0 16px;
@@ -335,9 +358,7 @@
       font-weight: 800;
     }
 
-    .error.show {
-      display: block;
-    }
+    .error.show { display: block; }
 
     .choice-grid {
       display: grid;
@@ -433,9 +454,7 @@
       background: rgba(248, 251, 255, 0.82);
     }
 
-    .edit-info {
-      min-width: 0;
-    }
+    .edit-info { min-width: 0; }
 
     .edit-name {
       display: block;
@@ -470,29 +489,19 @@
       background: rgba(255, 126, 157, 0.14);
     }
 
-    @media (max-width: 520px) {
-      .edit-item {
-        grid-template-columns: 1fr;
-      }
-    }
-
     @media (max-width: 760px) {
       .app {
         width: min(100% - 20px, 1120px);
         padding-top: 28px;
       }
 
-      .board {
-        grid-template-columns: 1fr;
-      }
+      .board { grid-template-columns: 1fr; }
+      th, td { padding: 12px 10px; }
+      .choice-grid { grid-template-columns: 1fr; }
+    }
 
-      th, td {
-        padding: 12px 10px;
-      }
-
-      .choice-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 520px) {
+      .edit-item { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -503,6 +512,10 @@
       <div class="hero-badge">1스트라이크 2아웃제</div>
       <h1>Blue-Hour 경고관리표</h1>
       <p>활동경고와 캐입경고를 구분해 관리하는 표입니다.</p>
+      <div class="top-status">
+        <span class="status-pill" id="syncStatus">시트 연결 대기 중</span>
+        <button class="refresh-btn" type="button" id="refreshBtn">새로고침</button>
+      </div>
     </header>
 
     <section class="board" aria-label="경고관리표">
@@ -548,10 +561,7 @@
             <button class="ghost-btn" type="button" data-close-modal>취소</button>
             <button class="primary-btn" type="button" id="passwordSubmitBtn">확인</button>
           </div>
-          <p class="small-note">
-            GitHub Pages에서 사용하려면 같은 저장소에 <b>password.txt</b> 파일을 만들고,<br />
-            한 줄에 하나씩 비밀번호를 적어두면 됩니다. 예: 0000, 1111
-          </p>
+          <p class="small-note">비밀번호 검사는 Google Apps Script에서 처리됩니다.</p>
         </div>
 
         <div class="step" id="categoryStep">
@@ -572,14 +582,6 @@
           </div>
         </div>
 
-        <div class="step" id="editStep">
-          <p class="help-text">등록된 캐릭명을 수정하거나 항목을 삭제할 수 있습니다. 캐릭명만 수정되며, 연결된 URL은 그대로 유지됩니다.</p>
-          <div id="editList" class="edit-list"></div>
-          <div class="button-row">
-            <button class="ghost-btn" type="button" id="backFromEditBtn">뒤로</button>
-          </div>
-        </div>
-
         <div class="step" id="inputStep">
           <p class="help-text">캐릭명과 밴드멤버주소를 입력해주세요. 밴드멤버주소는 선택사항입니다.</p>
           <div class="field">
@@ -591,10 +593,19 @@
             <label for="memberUrlInput">밴드멤버주소</label>
             <input id="memberUrlInput" type="url" placeholder="https://band.us/..." />
           </div>
+          <p class="error" id="saveError">저장에 실패했습니다.</p>
           <div class="button-row">
             <button class="danger-btn" type="button" id="finishBtn">끝</button>
             <button class="sub-btn" type="button" id="backToCategoryBtn">항목 다시 선택</button>
             <button class="primary-btn" type="button" id="nextBtn">다음</button>
+          </div>
+        </div>
+
+        <div class="step" id="editStep">
+          <p class="help-text">등록된 캐릭명을 수정하거나 항목을 삭제할 수 있습니다. 캐릭명만 수정되며, 연결된 URL은 그대로 유지됩니다.</p>
+          <div id="editList" class="edit-list"></div>
+          <div class="button-row">
+            <button class="ghost-btn" type="button" id="backFromEditBtn">뒤로</button>
           </div>
         </div>
       </div>
@@ -602,10 +613,14 @@
   </div>
 
   <script>
-    const PASSWORD_FILE_URL = "./password.txt";
-    const STORAGE_KEY = "blue-hour-warning-table-v1";
+    /*
+      1. Google Apps Script를 웹 앱으로 배포한 뒤 아래 URL을 교체하세요.
+      2. 예: const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxkOSGU20HMrWIMoKlE_VkPVX82oWuc5Kvn0CkfafPkYuEcXTtKu_H5Zg83OrQsm4s_3g/exec";
+    */
+    const GAS_WEB_APP_URL = "여기에_Google_Apps_Script_웹앱_URL_붙여넣기";
 
     const state = {
+      adminPassword: "",
       selectedCategory: null,
       data: {
         activity: [],
@@ -627,6 +642,7 @@
     const characterInput = document.getElementById("characterInput");
     const memberUrlInput = document.getElementById("memberUrlInput");
     const characterError = document.getElementById("characterError");
+    const saveError = document.getElementById("saveError");
     const nextBtn = document.getElementById("nextBtn");
     const finishBtn = document.getElementById("finishBtn");
     const backToCategoryBtn = document.getElementById("backToCategoryBtn");
@@ -638,22 +654,15 @@
     const roleplayTable = document.getElementById("roleplayTable");
     const activityCount = document.getElementById("activityCount");
     const roleplayCount = document.getElementById("roleplayCount");
+    const syncStatus = document.getElementById("syncStatus");
+    const refreshBtn = document.getElementById("refreshBtn");
 
-    function loadData() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return;
-
-        const parsed = JSON.parse(saved);
-        state.data.activity = Array.isArray(parsed.activity) ? parsed.activity : [];
-        state.data.roleplay = Array.isArray(parsed.roleplay) ? parsed.roleplay : [];
-      } catch (error) {
-        console.warn("저장 데이터를 불러오지 못했습니다.", error);
-      }
+    function isGasConfigured() {
+      return GAS_WEB_APP_URL && !GAS_WEB_APP_URL.includes("여기에_");
     }
 
-    function saveData() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    function setStatus(message) {
+      syncStatus.textContent = message;
     }
 
     function escapeHtml(value) {
@@ -672,12 +681,58 @@
       return "https://" + trimmed;
     }
 
-    function parsePasswordText(passwordText) {
-      return String(passwordText || "")
-        .split("\n")
-        .map(line => line.replace(/\r/g, "").trim())
-        .filter(Boolean)
-        .map(line => line.replace(/^['"]|['"]$/g, ""));
+    async function gasRequest(action, payload = {}) {
+      if (!isGasConfigured()) {
+        throw new Error("GAS_WEB_APP_URL이 설정되지 않았습니다.");
+      }
+
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({ action, ...payload })
+      });
+
+      const result = await response.json();
+
+      if (!result.ok) {
+        throw new Error(result.message || "요청 처리에 실패했습니다.");
+      }
+
+      return result;
+    }
+
+    function splitSheetRows(rows) {
+      const nextData = { activity: [], roleplay: [] };
+
+      rows.forEach(row => {
+        if (row.type === "activity" || row.type === "roleplay") {
+          nextData[row.type].push(row);
+        }
+      });
+
+      state.data = nextData;
+    }
+
+    async function loadWarnings() {
+      if (!isGasConfigured()) {
+        setStatus("GAS 웹앱 URL을 먼저 입력하세요");
+        renderAllTables();
+        return;
+      }
+
+      try {
+        setStatus("시트 불러오는 중...");
+        const result = await gasRequest("list");
+        splitSheetRows(result.rows || []);
+        renderAllTables();
+        setStatus("시트 동기화 완료");
+      } catch (error) {
+        console.error(error);
+        setStatus("시트 불러오기 실패");
+      }
     }
 
     function renderTable(type) {
@@ -733,8 +788,8 @@
 
     function renderEditList() {
       const rows = [
-        ...state.data.activity.map((item, index) => ({ type: "activity", index, item })),
-        ...state.data.roleplay.map((item, index) => ({ type: "roleplay", index, item }))
+        ...state.data.activity.map(item => ({ type: "activity", item })),
+        ...state.data.roleplay.map(item => ({ type: "roleplay", item }))
       ];
 
       if (rows.length === 0) {
@@ -742,8 +797,9 @@
         return;
       }
 
-      editList.innerHTML = rows.map(({ type, index, item }) => {
+      editList.innerHTML = rows.map(({ type, item }) => {
         const safeName = escapeHtml(item.name);
+        const safeId = escapeHtml(item.id);
         const urlMark = item.url ? " · URL 연결됨" : "";
         return `
           <div class="edit-item">
@@ -751,43 +807,11 @@
               <span class="edit-name">${safeName}</span>
               <span class="edit-type">${getCategoryLabel(type)}${urlMark}</span>
             </div>
-            <button class="mini-btn edit" type="button" data-edit-type="${type}" data-edit-index="${index}">수정</button>
-            <button class="mini-btn delete" type="button" data-delete-type="${type}" data-delete-index="${index}">삭제</button>
+            <button class="mini-btn edit" type="button" data-edit-id="${safeId}" data-edit-name="${safeName}">수정</button>
+            <button class="mini-btn delete" type="button" data-delete-id="${safeId}" data-delete-name="${safeName}">삭제</button>
           </div>
         `;
       }).join("");
-    }
-
-    function editWarningName(type, index) {
-      const target = state.data[type][index];
-      if (!target) return;
-
-      const nextName = window.prompt("새 캐릭명을 입력해주세요. URL은 그대로 유지됩니다.", target.name);
-      if (nextName === null) return;
-
-      const trimmedName = nextName.trim();
-      if (!trimmedName) {
-        alert("캐릭명은 비워둘 수 없습니다.");
-        return;
-      }
-
-      target.name = trimmedName;
-      saveData();
-      renderAllTables();
-      renderEditList();
-    }
-
-    function deleteWarning(type, index) {
-      const target = state.data[type][index];
-      if (!target) return;
-
-      const ok = window.confirm(`'${target.name}' 항목을 삭제할까요?`);
-      if (!ok) return;
-
-      state.data[type].splice(index, 1);
-      saveData();
-      renderAllTables();
-      renderEditList();
     }
 
     function openModal() {
@@ -818,39 +842,35 @@
       characterInput.value = "";
       memberUrlInput.value = "";
       characterError.classList.remove("show");
-    }
-
-    async function getPasswordFromGithubText() {
-      const response = await fetch(PASSWORD_FILE_URL, { cache: "no-store" });
-      if (!response.ok) {
-        throw new Error("password.txt를 불러오지 못했습니다.");
-      }
-      return (await response.text()).trim();
+      saveError.classList.remove("show");
     }
 
     async function checkPassword() {
       passwordError.classList.remove("show");
       const inputPassword = passwordInput.value.trim();
 
-      try {
-        const passwordText = await getPasswordFromGithubText();
-        const passwordList = parsePasswordText(passwordText);
-
-        if (inputPassword && passwordList.includes(inputPassword)) {
-          showStep("category");
-          return;
-        }
-      } catch (error) {
-        console.warn(error);
+      if (!inputPassword) {
+        passwordError.textContent = "비밀번호를 입력해주세요.";
+        passwordError.classList.add("show");
+        return;
       }
 
-      passwordError.textContent = "비밀번호가 일치하지 않거나 password.txt를 불러오지 못했습니다.";
-      passwordError.classList.add("show");
+      try {
+        await gasRequest("auth", { password: inputPassword });
+        state.adminPassword = inputPassword;
+        showStep("category");
+      } catch (error) {
+        console.error(error);
+        passwordError.textContent = "비밀번호가 일치하지 않거나 시트 서버와 연결할 수 없습니다.";
+        passwordError.classList.add("show");
+      }
     }
 
-    function addWarningAndReset() {
+    async function addWarningAndReset() {
       const name = characterInput.value.trim();
       const rawUrl = memberUrlInput.value.trim();
+
+      saveError.classList.remove("show");
 
       if (!name) {
         characterError.classList.add("show");
@@ -858,32 +878,92 @@
         return false;
       }
 
-      const url = normalizeUrl(rawUrl);
-      state.data[state.selectedCategory].push({
-        name,
-        url,
-        createdAt: new Date().toISOString()
-      });
+      try {
+        nextBtn.disabled = true;
+        await gasRequest("add", {
+          password: state.adminPassword,
+          type: state.selectedCategory,
+          name,
+          url: normalizeUrl(rawUrl)
+        });
 
-      saveData();
-      renderAllTables();
-      clearInputs();
-      characterInput.focus();
-      return true;
+        await loadWarnings();
+        clearInputs();
+        characterInput.focus();
+        return true;
+      } catch (error) {
+        console.error(error);
+        saveError.textContent = "저장에 실패했습니다. 비밀번호 또는 GAS URL을 확인해주세요.";
+        saveError.classList.add("show");
+        return false;
+      } finally {
+        nextBtn.disabled = false;
+      }
+    }
+
+    async function editWarningName(id, currentName) {
+      const nextName = window.prompt("새 캐릭명을 입력해주세요. URL은 그대로 유지됩니다.", currentName);
+      if (nextName === null) return;
+
+      const trimmedName = nextName.trim();
+      if (!trimmedName) {
+        alert("캐릭명은 비워둘 수 없습니다.");
+        return;
+      }
+
+      try {
+        await gasRequest("update", {
+          password: state.adminPassword,
+          id,
+          name: trimmedName
+        });
+        await loadWarnings();
+        renderEditList();
+      } catch (error) {
+        console.error(error);
+        alert("수정에 실패했습니다.");
+      }
+    }
+
+    async function deleteWarning(id, currentName) {
+      const ok = window.confirm(`'${currentName}' 항목을 삭제할까요?`);
+      if (!ok) return;
+
+      try {
+        await gasRequest("delete", {
+          password: state.adminPassword,
+          id
+        });
+        await loadWarnings();
+        renderEditList();
+      } catch (error) {
+        console.error(error);
+        alert("삭제에 실패했습니다.");
+      }
     }
 
     function runSelfTests() {
-      const parsed = parsePasswordText('"0000"\n1111\r\n\'2222\'\n\n 3333 ');
-      console.assert(parsed.includes("0000"), "password parser should accept double-quoted password");
-      console.assert(parsed.includes("1111"), "password parser should accept plain password");
-      console.assert(parsed.includes("2222"), "password parser should accept single-quoted password");
-      console.assert(parsed.includes("3333"), "password parser should trim spaces");
       console.assert(normalizeUrl("band.us/test") === "https://band.us/test", "normalizeUrl should add https://");
       console.assert(normalizeUrl("https://band.us/test") === "https://band.us/test", "normalizeUrl should keep https://");
+      console.assert(splitTestRows().activity.length === 1, "splitSheetRows should classify activity rows");
+      console.assert(splitTestRows().roleplay.length === 1, "splitSheetRows should classify roleplay rows");
+    }
+
+    function splitTestRows() {
+      const backup = state.data;
+      splitSheetRows([
+        { id: "1", type: "activity", name: "A", url: "" },
+        { id: "2", type: "roleplay", name: "B", url: "" },
+        { id: "3", type: "unknown", name: "C", url: "" }
+      ]);
+      const result = state.data;
+      state.data = backup;
+      return result;
     }
 
     openManageBtn.addEventListener("click", openModal);
     passwordSubmitBtn.addEventListener("click", checkPassword);
+    refreshBtn.addEventListener("click", loadWarnings);
 
     passwordInput.addEventListener("keydown", (event) => {
       if (event.key === "Enter") checkPassword();
@@ -909,14 +989,10 @@
     });
 
     characterInput.addEventListener("input", () => {
-      if (characterInput.value.trim()) {
-        characterError.classList.remove("show");
-      }
+      if (characterInput.value.trim()) characterError.classList.remove("show");
     });
 
-    nextBtn.addEventListener("click", () => {
-      addWarningAndReset();
-    });
+    nextBtn.addEventListener("click", addWarningAndReset);
 
     finishBtn.addEventListener("click", () => {
       closeModal();
@@ -937,22 +1013,22 @@
     });
 
     editList.addEventListener("click", (event) => {
-      const editButton = event.target.closest("[data-edit-type]");
-      const deleteButton = event.target.closest("[data-delete-type]");
+      const editButton = event.target.closest("[data-edit-id]");
+      const deleteButton = event.target.closest("[data-delete-id]");
 
       if (editButton) {
-        editWarningName(editButton.dataset.editType, Number(editButton.dataset.editIndex));
+        editWarningName(editButton.dataset.editId, editButton.dataset.editName);
         return;
       }
 
       if (deleteButton) {
-        deleteWarning(deleteButton.dataset.deleteType, Number(deleteButton.dataset.deleteIndex));
+        deleteWarning(deleteButton.dataset.deleteId, deleteButton.dataset.deleteName);
       }
     });
 
     runSelfTests();
-    loadData();
     renderAllTables();
+    loadWarnings();
   </script>
 </body>
 </html>
